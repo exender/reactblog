@@ -1,58 +1,102 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react';
+import "./App.css";
+const Login = () => {
+  const [userInfos, setUserInfos] = useState({
+    email: '',
+    password: '',
+    lastname: '',
+    firstname: ''
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLogged, setIsLogged] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
-const App = () => {
-  const [posts, setPosts] = useState([]);
-  const [selectedPost, setSelectedPost] = useState({});
-  const [comments, setComments] = useState([]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const result = await axios.get('https://jsonplaceholder.typicode.com/posts');
-      setPosts(result.data);
-    };
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const fetchComments = async () => {
-      const result = await axios.get(`https://jsonplaceholder.typicode.com/comments?postId=${selectedPost.id}`);
-      setComments(result.data);
-    };
-
-    if (selectedPost.id) {
-      fetchComments();
-    }
-  }, [selectedPost]);
-
-  const handlePostClick = post => {
-    setSelectedPost(post);
+  const handleSubmit = e => {
+    e.preventDefault();
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      setIsLogged(true);
+    }, 2000);
   };
 
+  const handleChange = e => {
+    setUserInfos({ ...userInfos, [e.target.name]: e.target.value });
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleSave = e => {
+    e.preventDefault();
+    setIsEditing(false);
+  };
+
+  if (isLoading) {
+    return <h1>Loading...</h1>;
+  }
+
+  if (isLogged && !isEditing) {
+    return (
+      <div>
+        <h1>Profile</h1>
+        <p>Email: {userInfos.email}</p>
+        <p>Last Name: {userInfos.lastname}</p>
+        <p>First Name: {userInfos.firstname}</p>
+        <button onClick={handleEdit}>Edit</button>
+        <button onClick={() => setIsLogged(false)}>Logout</button>
+      </div>
+    );
+  } else if (isLogged && isEditing) {
+    return (
+      <form onSubmit={handleSave}>
+        <input
+          type="email"
+          name="email"
+          value={userInfos.email}
+          onChange={handleChange}
+          placeholder="Email"
+        />
+        <input
+          type="text"
+          name="lastname"
+          value={userInfos.lastname}
+          onChange={handleChange}
+          placeholder="Last Name"
+        />
+        <input
+          type="text"
+          name="firstname"
+          value={userInfos.firstname}
+          onChange={handleChange}
+          placeholder="First Name"
+        />
+        <button type="submit">Save</button>
+        <button onClick={() => setIsEditing(false)}>Cancel</button>
+      </form>
+    );
+  }
+
   return (
-    <div>
-      <h2>Articles</h2>
-      {posts.map(post => (
-        <div key={post.id} onClick={() => handlePostClick(post)}>
-          <h3>{post.title}</h3>
-          <p>{post.body}</p>
-        </div>
-      ))}
-      {selectedPost.id && (
-        <div>
-          <h2>Commentaires</h2>
-          {comments.map(comment => (
-            <div key={comment.id}>
-              <p>{comment.name}</p>
-              <p>{comment.email}</p>
-              <p>{comment.body}</p>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+    <form onSubmit={handleSubmit}>
+      <input
+        type="email"
+        name="email"
+        value={userInfos.email}
+        onChange={handleChange}
+        placeholder="Email"
+      />
+      <input
+        type="password"
+        name="password"
+        value={userInfos.password}
+        onChange={handleChange}
+        placeholder="Password"
+      />
+      <button type="submit">Login</button>
+    </form>
   );
 };
 
-export default App;
+export default Login;
